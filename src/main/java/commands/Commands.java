@@ -2,9 +2,11 @@ package commands;
 
 import java.io.File;
 import java.io.IOException;
+import java.io.InputStream;
 import java.nio.file.Files;
 import java.nio.file.Path;
 import java.util.Arrays;
+import java.util.zip.InflaterInputStream;
 
 public class Commands {
 
@@ -24,25 +26,22 @@ public class Commands {
     }
 
     public static void catFile(String sha) throws IOException {
-        final String blobFolder = sha.substring(0, 2);
-        final String blobFile = sha.substring(2);
-        final String temp = ".git/objects/" + blobFolder + "/" + blobFile;
-        final Path path = Path.of(temp);
+        final Path path = Path.of(".git/objects/" + sha.substring(0, 2)
+                         + "/" + sha.substring(2));
 
-        byte[] bytes = Files.readAllBytes(path);
+        try (InputStream fileStream = Files.newInputStream(path);
+            InflaterInputStream inflater = new InflaterInputStream(fileStream)) {
 
-        int idx = -1;
-        for (int i = 0; i < bytes.length; i++) {
-            if (bytes[i] == 0) {
-                idx = i;
-                break;
+            // read decompressed bytes
+            byte[] decompressed = inflater.readAllBytes();
+            String content = new String(decompressed);
+
+            // find where the null terminator
+            int nullIndex = content.indexOf('\0');
+            if (nullIndex != -1 && nullIndex + 1 < content.length()) {
+                String blobData = content.substring(nullIndex + 1);
+                System.out.print(blobData);
             }
-        }
-
-        if (idx != -1 && idx < bytes.length) {
-            byte[] afterNull = Arrays.copyOfRange(bytes, idx + 1, bytes.length);
-            String result = new String(afterNull);
-            System.out.println(result);
         }
     }
 }

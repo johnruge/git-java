@@ -1,3 +1,5 @@
+import java.io.IOException;
+
 import commands.Commands;
 
 public class Main {
@@ -8,7 +10,11 @@ public class Main {
             case "init" -> Commands.init();
             case "cat-file" -> {
               final String sha = args[2];
-              Commands.catFile(sha);
+              try {
+                Commands.catFile(sha);
+              } catch (IOException e) {
+                  System.err.println("fatal: could not read object " + sha);
+              }
             }
             default -> System.out.println("Unknown command: " + command);
         }
