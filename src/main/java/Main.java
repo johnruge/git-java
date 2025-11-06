@@ -16,6 +16,14 @@ public class Main {
                   System.err.println("fatal: could not read object " + sha);
               }
             }
+            case "hash-object" -> {
+              final String filePath = args[2];
+              try {
+                Commands.hashObject(filePath);
+              } catch (Exception e) {
+                  System.err.println("fatal: could not hash file " + filePath + ": " + e.getMessage());
+              }
+            }
             default -> System.out.println("Unknown command: " + command);
         }
     }

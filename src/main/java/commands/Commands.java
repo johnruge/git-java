@@ -3,9 +3,11 @@ package commands;
 import java.io.File;
 import java.io.IOException;
 import java.io.InputStream;
+import java.io.OutputStream;
 import java.nio.file.Files;
 import java.nio.file.Path;
-import java.util.Arrays;
+import java.security.MessageDigest;
+import java.util.zip.DeflaterOutputStream;
 import java.util.zip.InflaterInputStream;
 
 public class Commands {
@@ -43,5 +45,41 @@ public class Commands {
                 System.out.print(blobData);
             }
         }
+    }
+
+    public static void hashObject(String path) throws Exception {
+        // read from file and store blob content in bytes
+        byte[] content = Files.readAllBytes(Path.of(path));
+        byte[] header = ("blob " + content.length + '\0').getBytes();
+        byte[] blobContent = new byte[content.length + header.length];
+
+        System.arraycopy(header, 0, blobContent, 0, header.length);
+        System.arraycopy(content, 0, blobContent, header.length, content.length);
+
+        // generate sha-1 and create file path
+        MessageDigest sha1 = MessageDigest.getInstance("SHA-1");
+        byte[] digest = sha1.digest(blobContent);
+        String hash = bytesToHex(digest);
+        String gitPath = ".git/objects/" + hash.substring(0, 2);
+        String fileName = hash.substring(2);
+
+        Files.createDirectories(Path.of(gitPath));
+        Path objectPath = Path.of(gitPath, fileName);
+
+        // zlib encode and write to file
+        try (OutputStream fileOut = Files.newOutputStream(objectPath);
+            DeflaterOutputStream zlibOut = new DeflaterOutputStream(fileOut)) {
+            zlibOut.write(blobContent);
+        }
+
+        System.out.println("Wrote object " + hash + " to " + objectPath);
+    }
+
+    private static String bytesToHex(byte[] bytes) {
+        StringBuilder sb = new StringBuilder();
+        for (byte b : bytes) {
+            sb.append(String.format("%02x", b));
+        }
+        return sb.toString();
     }
 }
