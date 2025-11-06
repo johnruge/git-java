@@ -72,7 +72,7 @@ public class Commands {
             zlibOut.write(blobContent);
         }
 
-        System.out.println("Wrote object " + hash + " to " + objectPath);
+        System.out.println(hash);
     }
 
     private static String bytesToHex(byte[] bytes) {
