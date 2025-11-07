@@ -13,7 +13,7 @@ public class Main {
               try {
                 Commands.catFile(sha);
               } catch (IOException e) {
-                  System.err.println("fatal: could not read object " + sha);
+                System.err.println("fatal: could not read object " + sha);
               }
             }
             case "hash-object" -> {
@@ -21,7 +21,15 @@ public class Main {
               try {
                 Commands.hashObject(filePath);
               } catch (Exception e) {
-                  System.err.println("fatal: could not hash file " + filePath + ": " + e.getMessage());
+                System.err.println("fatal: could not hash file " + filePath + ": " + e.getMessage());
+              }
+            }
+            case "ls-tree" -> {
+              final String sha = args[2];
+              try {
+                Commands.lsTree(sha);
+              } catch (Exception e) {
+                System.err.println("Fatal: Couldn't read object " + sha);;
               }
             }
             default -> System.out.println("Unknown command: " + command);

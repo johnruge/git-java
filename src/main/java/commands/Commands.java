@@ -75,6 +75,36 @@ public class Commands {
         System.out.println(hash);
     }
 
+    public static void lsTree(String sha) throws Exception{
+        final Path path = Path.of(".git/objects/" + sha.substring(0, 2)
+                         + "/" + sha.substring(2));
+
+        try (InputStream fileStream = Files.newInputStream(path);
+            InflaterInputStream inflater = new InflaterInputStream(fileStream)) {
+
+            // read decompressed bytes
+            byte[] decompressed = inflater.readAllBytes();
+            String content = new String(decompressed);
+            String [] parts = content.split(" ");
+
+            // read the contents of the trees and strip away the other information
+            // to stay consistent with the --name-only flag
+            for (int i = 0; i < parts.length; i++) {
+                if (i > 1) {
+                    String curr = parts[i];
+                    for (int j = 0; j < curr.length(); j++) {
+                        if (curr.charAt(j) == '\0') {
+                            System.out.println(curr.substring(0, j));
+                            break;
+                        }
+                    }
+                }
+            }
+
+        }
+
+    }
+
     private static String bytesToHex(byte[] bytes) {
         StringBuilder sb = new StringBuilder();
         for (byte b : bytes) {
