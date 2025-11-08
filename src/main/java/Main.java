@@ -1,5 +1,5 @@
 import java.io.IOException;
-
+import java.nio.file.Path;
 import commands.Commands;
 
 public class Main {
@@ -30,6 +30,15 @@ public class Main {
                 Commands.lsTree(sha);
               } catch (Exception e) {
                 System.err.println("Fatal: Couldn't read object " + sha);;
+              }
+            }
+            case "write-tree" -> {
+              Path cwd = Path.of(".");
+              try {
+                String sha = Commands.writeTree(cwd);
+                System.out.println(sha);
+              } catch (Exception e) {
+                System.err.println("Fatal: Couldn't write tree");
               }
             }
             default -> System.out.println("Unknown command: " + command);
