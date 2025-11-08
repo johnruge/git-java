@@ -8,6 +8,7 @@ import java.io.OutputStream;
 import java.nio.file.Files;
 import java.nio.file.Path;
 import java.security.MessageDigest;
+import java.util.Arrays;
 import java.util.zip.DeflaterOutputStream;
 import java.util.zip.InflaterInputStream;
 
@@ -137,6 +138,7 @@ public class Commands {
 
     public static String writeTree(Path cwd) throws Exception {
         File[] entries = cwd.toFile().listFiles();
+        Arrays.sort(entries, (a, b) -> a.getName().compareTo(b.getName()));
         ByteArrayOutputStream out = new ByteArrayOutputStream();
 
         for (File f : entries) {
