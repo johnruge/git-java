@@ -157,7 +157,7 @@ public class Commands {
                 String sha = writeTree(f.toPath());
 
                 //do the same for the dir after the recursive call return the sha
-                out.write(("040000 " + f.getName()).getBytes());
+                out.write(("40000 " + f.getName()).getBytes());
                 out.write(0);
                 out.write(hexToBytes(sha));
             }
