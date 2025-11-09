@@ -196,13 +196,14 @@ public class Commands {
     throws Exception {
         // write bytes for all the content of the commit
         ByteArrayOutputStream out = new ByteArrayOutputStream();
-        out.write(("tree " + treeSha).getBytes());
-        out.write(("parent " + parentSha).getBytes());
-        //use placeholders for author and committer creds for this challenge
-        out.write(("author <name> <email> timestamp").getBytes());
-        out.write(("committer <name> <email> timestamp").getBytes());
+        out.write(("tree " + treeSha + "\n").getBytes());
+        out.write(("parent " + parentSha + "\n").getBytes());
+        //use dummy for author and committer creds for this challenge
+        out.write(("John <john@example.com> 0 +0000\n").getBytes());
+        out.write(("John <john@example.com> 0 +0000\n").getBytes());
         //write the commit message
-        out.write((message).getBytes());
+        out.write(("\n".getBytes()));
+        out.write((message + "\n").getBytes());
 
         // combine header and content and tranform to byte array for hashingx
         byte[] outByteArray = out.toByteArray();
