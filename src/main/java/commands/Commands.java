@@ -12,6 +12,8 @@ import java.util.Arrays;
 import java.util.zip.DeflaterOutputStream;
 import java.util.zip.InflaterInputStream;
 
+import javax.swing.text.StyledEditorKit;
+
 public class Commands {
 
     public static void init() {
@@ -188,6 +190,45 @@ public class Commands {
         }
 
         return sha;
+    }
+
+    public static void commitTree(String treeSha, String parentSha, String message)
+    throws Exception {
+        // write bytes for all the content of the commit
+        ByteArrayOutputStream out = new ByteArrayOutputStream();
+        out.write(("tree " + treeSha).getBytes());
+        out.write(("parent " + parentSha).getBytes());
+        //use placeholders for author and committer creds for this challenge
+        out.write(("author <name> <email> timestamp").getBytes());
+        out.write(("committer <name> <email> timestamp").getBytes());
+        //write the commit message
+        out.write((message).getBytes());
+
+        // combine header and content and tranform to byte array for hashingx
+        byte[] outByteArray = out.toByteArray();
+        byte[] header = ("commit " + outByteArray.length + '\0').getBytes();
+        byte[] store = new byte[header.length + outByteArray.length];
+
+        System.arraycopy(header, 0, store, 0, header.length);
+        System.arraycopy(outByteArray, 0, store, header.length, outByteArray.length);
+
+        // generate sha-1 and create file path
+        MessageDigest sha1 = MessageDigest.getInstance("SHA-1");
+        byte[] digest = sha1.digest(store);
+        String hash = bytesToHex(digest);
+        String gitPath = ".git/objects/" + hash.substring(0, 2);
+        String fileName = hash.substring(2);
+
+        Files.createDirectories(Path.of(gitPath));
+        Path objectPath = Path.of(gitPath, fileName);
+
+        // zlib encode and write to file
+        try (OutputStream fileOut = Files.newOutputStream(objectPath);
+            DeflaterOutputStream zlibOut = new DeflaterOutputStream(fileOut)) {
+            zlibOut.write(store);
+        }
+
+        System.out.println(hash);
     }
 
     private static String bytesToHex(byte[] bytes) {

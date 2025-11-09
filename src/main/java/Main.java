@@ -41,6 +41,16 @@ public class Main {
                 System.err.println("Fatal: Couldn't write tree");
               }
             }
+            case "commit-tree" -> {
+              String treeSha = args[1];
+              String parentSha = args[3];
+              String message = args[5];
+              try {
+                Commands.commitTree(treeSha, parentSha, message);
+              } catch (Exception e) {
+                System.out.println("Fatal: Couldn't commit tree");
+              }
+            }
             default -> System.out.println("Unknown command: " + command);
         }
     }
